@@ -110,11 +110,13 @@ else
     disp('Generation in cycle 1 is OK.');
 end
 
-Total_Maximum_Generation2 = sum(mpc210.gen(:,9)); 
-Total_Peak_Demand2 = sum(mpc210.bus(:,3));
+% CYCLE 2: Generation vs Demand Check
+Total_Maximum_Generation2 = sum(mpc210.gen(:,9)); % Sums Pmax of all generation units
+Total_Peak_Demand2 = sum(mpc210.bus(:,3)); % Sums Pd of all loads
 
+% Checking if peak demand exceeds generation capacity
 if Total_Maximum_Generation2 < Total_Peak_Demand2 * 1.05 
-    disp('Increased generation in cycle 2 is required.');
+    disp('Increased generation in cycle 2 is required.'); 
 else
     disp('Generation in cycle 2 is OK.');
 end
@@ -210,38 +212,38 @@ mpc3_wind_plus_solar.gen = [mpc3_wind_plus_solar.gen; new_solar_unit];
 solar_cost_row = [2, 0, 0, 3, 0, 0, 0];
 mpc3_wind_plus_solar.gencost = [mpc3_wind_plus_solar.gencost; solar_cost_row];
 
-mpc3WPS10 = mpc3_wind_plus_solar;
-mpc3WPS08 = mpc3_wind_plus_solar;
-mpc3WPS06= mpc3_wind_plus_solar;
-mpc3WPS04 = mpc3_wind_plus_solar; 
-mpc3WPS10.bus(:, 3) = Pd_Orig * demand_factor * demand_factor;
-mpc3WPS10.bus(:, 4) = Qd_Orig * demand_factor * demand_factor;
+mpc3WS10 = mpc3_wind_plus_solar;
+mpc3WS08 = mpc3_wind_plus_solar;
+mpc3WS06= mpc3_wind_plus_solar;
+mpc3WS04 = mpc3_wind_plus_solar; 
+mpc3WS10.bus(:, 3) = Pd_Orig * demand_factor * demand_factor;
+mpc3WS10.bus(:, 4) = Qd_Orig * demand_factor * demand_factor;
 
-results_cycle3_10_WPS = runopf(mpc3WPS10, mpopt);
-check_line_upgrades(results_cycle3_10_WPS, '3WS');
+results_cycle3_10_WS = runopf(mpc3WS10, mpopt);
+check_line_upgrades(results_cycle3_10_WS, '3WS');
 
-mpc3WPS08.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_08;
-mpc3WPS08.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_08;
+mpc3WS08.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_08;
+mpc3WS08.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_08;
 
-results_cycle3_08_WPS = runopf(mpc3WPS08, mpopt);
+results_cycle3_08_WS = runopf(mpc3WS08, mpopt);
 
-mpc3WPS06.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_06;
-mpc3WPS06.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_06;
+mpc3WS06.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_06;
+mpc3WS06.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_06;
 
-results_cycle3_06_WPS = runopf(mpc3WPS06, mpopt);
+results_cycle3_06_WS = runopf(mpc3WS06, mpopt);
 
-mpc3WPS04.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_04; 
-mpc3WPS04.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_04;
+mpc3WS04.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_04; 
+mpc3WS04.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_04;
 
-results_cycle3_04_WPS = runopf(mpc3WPS04, mpopt);
+results_cycle3_04_WS = runopf(mpc3WS04, mpopt);
 
-LDC3_WPS = (((results_cycle3_10_WPS.f * 43800 * 0.2) + (results_cycle3_08_WPS.f * 43800 * 0.3) + (results_cycle3_06_WPS.f * 43800 * 0.3) + (results_cycle3_04_WPS.f * 43800 * 0.2)) * 0.72)/10^9;
-disp(['cost of cycle 3_wind+solar in billions of pounds = ', num2str(LDC3_WPS)]);
+LDC3_WS = (((results_cycle3_10_WS.f * 43800 * 0.2) + (results_cycle3_08_WS.f * 43800 * 0.3) + (results_cycle3_06_WS.f * 43800 * 0.3) + (results_cycle3_04_WS.f * 43800 * 0.2)) * 0.72)/10^9;
+disp(['cost of cycle 3_wind+solar in billions of pounds = ', num2str(LDC3_WS)]);
 
-Total_Maximum_Generation3_WPS = sum(mpc3WPS10.gen(:,9)); 
-Total_Peak_Demand3_WPS = sum(mpc3WPS10.bus(:,3)); 
+Total_Maximum_Generation3_WS = sum(mpc3WS10.gen(:,9)); 
+Total_Peak_Demand3_WS = sum(mpc3WS10.bus(:,3)); 
 
-if Total_Maximum_Generation3_WPS < Total_Peak_Demand3_WPS * 1.05 
+if Total_Maximum_Generation3_WS < Total_Peak_Demand3_WS * 1.05 
     disp('Increased generation in cycle 3_wind+solar is required.');
 end
 
@@ -251,46 +253,46 @@ end
 
 %---------------------------------------------------------------------------------------------------
 
-mpc3_oil = mpc310;
+mpc3_CCGT = mpc310;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-mpc3_oil.gen = [mpc3_oil.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc3_oil.gencost = [mpc3_oil.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+mpc3_CCGT.gen = [mpc3_CCGT.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc3_CCGT.gencost = [mpc3_CCGT.gencost; CCGT_cost_row];
 
-mpc3_oil10 = mpc3_oil;
-mpc3_oil08 = mpc3_oil;
-mpc3_oil06 = mpc3_oil;
-mpc3_oil04 = mpc3_oil; 
+mpc3_CCGT10 = mpc3_CCGT;
+mpc3_CCGT08 = mpc3_CCGT;
+mpc3_CCGT06 = mpc3_CCGT;
+mpc3_CCGT04 = mpc3_CCGT; 
 
-mpc3_oil10.bus(:, 3) = Pd_Orig * demand_factor * demand_factor;
-mpc3_oil10.bus(:, 4) = Qd_Orig * demand_factor * demand_factor;
+mpc3_CCGT10.bus(:, 3) = Pd_Orig * demand_factor * demand_factor;
+mpc3_CCGT10.bus(:, 4) = Qd_Orig * demand_factor * demand_factor;
 
-results_cycle3_10_oil = runopf(mpc3_oil10, mpopt);
-check_line_upgrades(results_cycle3_10_oil, '3C');
+results_cycle3_10_CCGT = runopf(mpc3_CCGT10, mpopt);
+check_line_upgrades(results_cycle3_10_CCGT, '3C');
 
-mpc3_oil08.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_08;
-mpc3_oil08.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_08;
+mpc3_CCGT08.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_08;
+mpc3_CCGT08.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_08;
 
-results_cycle3_08_oil = runopf(mpc3_oil08, mpopt);
+results_cycle3_08_CCGT = runopf(mpc3_CCGT08, mpopt);
 
-mpc3_oil06.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_06;
-mpc3_oil06.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_06;
+mpc3_CCGT06.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_06;
+mpc3_CCGT06.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_06;
 
-results_cycle3_06_oil = runopf(mpc3_oil06, mpopt);
+results_cycle3_06_CCGT = runopf(mpc3_CCGT06, mpopt);
 
-mpc3_oil04.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_04; 
-mpc3_oil04.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_04;
+mpc3_CCGT04.bus(:, 3) = Pd_Orig * demand_factor * demand_factor * loadfactor_04; 
+mpc3_CCGT04.bus(:, 4) = Qd_Orig * demand_factor * demand_factor * loadfactor_04;
 
-results_cycle3_04_oil = runopf(mpc3_oil04, mpopt);
+results_cycle3_04_CCGT = runopf(mpc3_CCGT04, mpopt);
 
-LDC3_oil = (((results_cycle3_10_oil.f * 43800 * 0.2) + (results_cycle3_08_oil.f * 43800 * 0.3) + (results_cycle3_06_oil.f * 43800 * 0.3) + (results_cycle3_04_oil.f * 43800 * 0.2)) * 0.72)/10^9;
-disp(['cost of cycle 3_CCGT in billions of pounds = ', num2str(LDC3_oil)]);
+LDC3_CCGT = (((results_cycle3_10_CCGT.f * 43800 * 0.2) + (results_cycle3_08_CCGT.f * 43800 * 0.3) + (results_cycle3_06_CCGT.f * 43800 * 0.3) + (results_cycle3_04_CCGT.f * 43800 * 0.2)) * 0.72)/10^9;
+disp(['cost of cycle 3_CCGT in billions of pounds = ', num2str(LDC3_CCGT)]);
 
-Total_Maximum_Generation3_oil = sum(mpc3_oil10.gen(:,9)); 
-Total_Peak_Demand3_oil = sum(mpc3_oil10.bus(:,3));
+Total_Maximum_Generation3_CCGT = sum(mpc3_CCGT10.gen(:,9)); 
+Total_Peak_Demand3_CCGT = sum(mpc3_CCGT10.bus(:,3));
 
-if Total_Maximum_Generation3_oil < Total_Peak_Demand3_oil * 1.05 
+if Total_Maximum_Generation3_CCGT < Total_Peak_Demand3_CCGT * 1.05 
     disp('Increased generation in cycle 3_CCGT is required.');
 end
 
@@ -578,10 +580,10 @@ end
 
 mpc4_WSG = mpc3_wind_plus_solar;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-mpc4_WSG.gen = [mpc4_WSG.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc4_WSG.gencost = [mpc4_WSG.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+mpc4_WSG.gen = [mpc4_WSG.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc4_WSG.gencost = [mpc4_WSG.gencost; CCGT_cost_row];
 
 
 
@@ -685,12 +687,12 @@ end
 
 %---------------------------------------------------------------------------------------------------
 
-mpc4_oil = mpc3_oil;
+mpc4_CCGT = mpc3_CCGT;
 
-mpc4O10 = mpc4_oil;
-mpc4O08 = mpc4_oil;
-mpc4O06 = mpc4_oil;
-mpc4O04 = mpc4_oil;
+mpc4O10 = mpc4_CCGT;
+mpc4O08 = mpc4_CCGT;
+mpc4O06 = mpc4_CCGT;
+mpc4O04 = mpc4_CCGT;
 
 mpc4O10.bus(:,3) = Pd_Orig * demand_factor^3;
 mpc4O10.bus(:,4) = Qd_Orig * demand_factor^3;
@@ -713,8 +715,8 @@ mpc4O04.bus(:,4) = Qd_Orig * demand_factor^3 * loadfactor_04;
 
 results_cycle_4O04 = runopf(mpc4O04, mpopt);
 
-LDC4_oil = (((results_cycle_4O10.f * 43800 * 0.2) + (results_cycle_4O08.f * 43800 * 0.3) + (results_cycle_4O06.f * 43800 * 0.3) + (results_cycle_4O04.f * 43800 * 0.2)) * 0.72)/10^9;
-disp(['cost of cycle 4_CCGT in billions of pounds = ', num2str(LDC4_oil)]);
+LDC4_CCGT = (((results_cycle_4O10.f * 43800 * 0.2) + (results_cycle_4O08.f * 43800 * 0.3) + (results_cycle_4O06.f * 43800 * 0.3) + (results_cycle_4O04.f * 43800 * 0.2)) * 0.72)/10^9;
+disp(['cost of cycle 4_CCGT in billions of pounds = ', num2str(LDC4_CCGT)]);
 
 Total_Maximum_Generation_4O = sum(mpc4O10.gen(:,9));
 Total_Peak_Demand_4O = sum(mpc4O10.bus(:,3)); 
@@ -952,10 +954,10 @@ end
 
 mpc5_WSSG = mpc4_wind_plus_solar;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc5_WSSG.gen = [mpc5_WSSG.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc5_WSSG.gencost = [mpc5_WSSG.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc5_WSSG.gen = [mpc5_WSSG.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc5_WSSG.gencost = [mpc5_WSSG.gencost; CCGT_cost_row];
 
 mpc5WSSG10 = mpc5_WSSG;
 mpc5WSSG08 = mpc5_WSSG;
@@ -1064,10 +1066,10 @@ end
 
 mpc5_WSGG = mpc4_WSG;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc5_WSGG.gen = [mpc5_WSGG.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc5_WSGG.gencost = [mpc5_WSGG.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc5_WSGG.gen = [mpc5_WSGG.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc5_WSGG.gencost = [mpc5_WSGG.gencost; CCGT_cost_row];
 
 mpc5WSGG10 = mpc5_WSGG;
 mpc5WSGG08 = mpc5_WSGG;
@@ -1286,17 +1288,17 @@ end
 %CYCLE 5-CCGT
 
 %---------------------------------------------------------------------------------------------------
-mpc5_oil = mpc4_oil;
+mpc5_CCGT = mpc4_CCGT;
 
-new_oil_unit = [11, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc5_oil.gen = [mpc5_oil.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc5_oil.gencost = [mpc5_oil.gencost; oil_cost_row];
+new_CCGT_unit = [11, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc5_CCGT.gen = [mpc5_CCGT.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc5_CCGT.gencost = [mpc5_CCGT.gencost; CCGT_cost_row];
 
-mpc5O10 = mpc5_oil;
-mpc5O08 = mpc5_oil;
-mpc5O06 = mpc5_oil;
-mpc5O04 = mpc5_oil;
+mpc5O10 = mpc5_CCGT;
+mpc5O08 = mpc5_CCGT;
+mpc5O06 = mpc5_CCGT;
+mpc5O04 = mpc5_CCGT;
 
 mpc5O10.bus(:,3) = Pd_Orig * demand_factor^4;
 mpc5O10.bus(:,4) = Qd_Orig * demand_factor^4;
@@ -1322,8 +1324,8 @@ mpc5O04.bus(:,4) = Qd_Orig * demand_factor^4 * loadfactor_04;
 results_cycle_5O04 = runopf(mpc5O04, mpopt);
 
 
-LDC5_oil = (((results_cycle_5O10.f * 43800 * 0.2) + (results_cycle_5O08.f * 43800 * 0.3) + (results_cycle_5O06.f * 43800 * 0.3) + (results_cycle_5O04.f * 43800 * 0.2)) * 0.72)/10^9;
-disp(['cost of cycle 5_CCGT in billions of pounds = ', num2str(LDC5_oil)]);
+LDC5_CCGT = (((results_cycle_5O10.f * 43800 * 0.2) + (results_cycle_5O08.f * 43800 * 0.3) + (results_cycle_5O06.f * 43800 * 0.3) + (results_cycle_5O04.f * 43800 * 0.2)) * 0.72)/10^9;
+disp(['cost of cycle 5_CCGT in billions of pounds = ', num2str(LDC5_CCGT)]);
 
 
 Total_Maximum_Generation_5O = sum(mpc5O10.gen(:,9)); 
@@ -1594,10 +1596,10 @@ end
 
 mpc6_WSSSC = mpc5_WSSS;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc6_WSSSC.gen = [mpc6_WSSSC.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc6_WSSSC.gencost = [mpc6_WSSSC.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc6_WSSSC.gen = [mpc6_WSSSC.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc6_WSSSC.gencost = [mpc6_WSSSC.gencost; CCGT_cost_row];
 
 mpc6WSSSC10 = mpc6_WSSSC;
 mpc6WSSSC08 = mpc6_WSSSC;
@@ -1699,10 +1701,10 @@ end
 
 mpc6_WSSCC = mpc5_WSSG;
 
-new_oil_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc6_WSSCC.gen = [mpc6_WSSCC.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc6_WSSCC.gencost = [mpc6_WSSCC.gencost; oil_cost_row];
+new_CCGT_unit = [23, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc6_WSSCC.gen = [mpc6_WSSCC.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc6_WSSCC.gencost = [mpc6_WSSCC.gencost; CCGT_cost_row];
 
 mpc6WSSCC10 = mpc6_WSSCC;
 mpc6WSSCC08 = mpc6_WSSCC;
@@ -1981,10 +1983,10 @@ end
 
 mpc6_WSCCC = mpc5_WSGG;
 
-new_oil_unit = [11, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc6_WSCCC.gen = [mpc6_WSCCC.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc6_WSCCC.gencost = [mpc6_WSCCC.gencost; oil_cost_row];
+new_CCGT_unit = [11, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc6_WSCCC.gen = [mpc6_WSCCC.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc6_WSCCC.gencost = [mpc6_WSCCC.gencost; CCGT_cost_row];
 
 mpc6WSCCC10 = mpc6_WSCCC;
 mpc6WSCCC08 = mpc6_WSCCC;
@@ -2207,19 +2209,19 @@ end
 
 %---------------------------------------------------------------------------------------------------
 
-mpc6_oil = mpc5_oil;
+mpc6_CCGT = mpc5_CCGT;
 
 
-new_oil_unit = [3, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
-mpc6_oil.gen = [mpc6_oil.gen; new_oil_unit];
-oil_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
-mpc6_oil.gencost = [mpc6_oil.gencost; oil_cost_row];
+new_CCGT_unit = [3, 0, 0, 80, -50, 1.05, 100, 1, 600, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; %23 and 11
+mpc6_CCGT.gen = [mpc6_CCGT.gen; new_CCGT_unit];
+CCGT_cost_row = [2, 1500, 0, 3, 0.001562, 7.92, 561];
+mpc6_CCGT.gencost = [mpc6_CCGT.gencost; CCGT_cost_row];
 
 
-mpc6O10 = mpc6_oil;
-mpc6O08 = mpc6_oil;
-mpc6O06 = mpc6_oil;
-mpc6O04 = mpc6_oil;
+mpc6O10 = mpc6_CCGT;
+mpc6O08 = mpc6_CCGT;
+mpc6O06 = mpc6_CCGT;
+mpc6O04 = mpc6_CCGT;
 
 mpc6O10.bus(:,3) = Pd_Orig * demand_factor^5;
 mpc6O10.bus(:,4) = Qd_Orig * demand_factor^5;
@@ -2242,8 +2244,8 @@ mpc6O04.bus(:,4) = Qd_Orig * demand_factor^5 * loadfactor_04;
 
 results_cycle_6O04 = runopf(mpc6O04, mpopt);
 
-LDC6_oil = (((results_cycle_6O10.f * 43800 * 0.2) + (results_cycle_6O08.f * 43800 * 0.3) + (results_cycle_6O06.f * 43800 * 0.3) + (results_cycle_6O04.f * 43800 * 0.2)) * 0.72)/10^9;
-disp(['cost of cycle 6_CCGT in billions of pounds = ', num2str(LDC6_oil)]);
+LDC6_CCGT = (((results_cycle_6O10.f * 43800 * 0.2) + (results_cycle_6O08.f * 43800 * 0.3) + (results_cycle_6O06.f * 43800 * 0.3) + (results_cycle_6O04.f * 43800 * 0.2)) * 0.72)/10^9;
+disp(['cost of cycle 6_CCGT in billions of pounds = ', num2str(LDC6_CCGT)]);
 
 Total_Maximum_Generation_6O = sum(mpc6O10.gen(:,9)); 
 Total_Peak_Demand_6O = sum(mpc6O10.bus(:,3)); 
